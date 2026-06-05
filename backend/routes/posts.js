@@ -179,7 +179,6 @@ router.put('/:id', protect, async (req, res) => {
 
     post.content = content;
     await post.save();
-
     res.status(200).json(post);
   } catch (error) {
     res.status(500).json({ message: error.message });

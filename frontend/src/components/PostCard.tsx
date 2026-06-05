@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Heart, MessageSquare, Trash2, MoreVertical, Edit3 } from 'lucide-react';
+import { Heart, MessageSquare, Trash2, Edit2, MoreVertical } from 'lucide-react';
 import axios from 'axios';
 import { Avatar } from '@mui/material';
 import { CommentSection } from './CommentSection';
@@ -40,11 +40,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
   const [showComments, setShowComments] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
+  
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content || '');
-  const [editLoading, setEditLoading] = useState(false);
 
   // Check if current logged-in user liked this post
   const isLiked = user ? post.likes.some((like) => like.user === user._id) : false;
@@ -101,19 +102,20 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
     }
   };
 
-  const handleSaveEdit = async () => {
-    if (editContent.trim() === '' && !post.imageUrl) {
-      alert('A post must have either text content or an image.');
+  const handleEdit = async () => {
+    if (!editContent.trim()) {
+      alert('Post content cannot be empty');
       return;
     }
     setEditLoading(true);
+
     try {
       const res = await axios.put(`${apiBaseUrl}/posts/${post._id}`, { content: editContent });
       onPostUpdated(res.data);
       setIsEditing(false);
     } catch (err: any) {
-      console.error('Failed to update post:', err);
-      alert(err.response?.data?.message || 'Failed to update post');
+      console.error('Failed to edit post:', err);
+      alert(err.response?.data?.message || 'Failed to edit post');
     } finally {
       setEditLoading(false);
     }
@@ -161,7 +163,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
           </div>
         </div>
 
-        {/* Action Controls - Keep Follow for everyone, plus 3-dot dropdown menu */}
+        {/* Follow Button + 3-dot Dropdown Actions Menu */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
           <button 
             style={{
@@ -178,105 +180,123 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
             Follow
           </button>
 
-          {/* 3-dot dropdown trigger */}
           <button
             onClick={() => setShowMenu(!showMenu)}
             style={{
-              background: 'none',
-              border: 'none',
+              backgroundColor: 'transparent',
               color: 'var(--text-muted)',
+              border: 'none',
+              padding: '6px',
+              borderRadius: '50%',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '6px',
-              borderRadius: '50%',
-              transition: 'background-color 0.2s',
+              transition: 'background-color 0.2s'
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-color)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            title="Post actions"
+            title="Post Actions"
           >
             <MoreVertical size={18} />
           </button>
 
-          {/* Dropdown Options */}
           {showMenu && (
-            <div style={{
-              position: 'absolute',
-              right: 0,
-              top: '36px',
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-              zIndex: 10,
-              minWidth: '130px',
-              overflow: 'hidden'
-            }}>
+            <div 
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                backgroundColor: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                zIndex: 20,
+                minWidth: '140px',
+                padding: '4px',
+                marginTop: '4px'
+              }}
+              onMouseLeave={() => setShowMenu(false)}
+            >
               <button
                 onClick={() => {
-                  setShowMenu(false);
-                  if (!isOwner) {
-                    alert('You can only edit your own posts.');
-                    return;
-                  }
+                  if (!isOwner) return;
                   setIsEditing(true);
+                  setShowMenu(false);
                 }}
+                disabled={!isOwner}
                 style={{
+                  width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  width: '100%',
-                  padding: '10px 12px',
+                  padding: '8px 12px',
                   border: 'none',
                   background: 'none',
-                  color: isOwner ? 'var(--text-main)' : 'var(--text-muted)',
                   fontSize: '13px',
+                  color: isOwner ? 'var(--text-main)' : 'var(--text-muted)',
                   cursor: isOwner ? 'pointer' : 'not-allowed',
+                  borderRadius: '4px',
                   textAlign: 'left',
                   opacity: isOwner ? 1 : 0.5
+                }}
+                onMouseEnter={(e) => {
+                  if (isOwner) e.currentTarget.style.backgroundColor = 'var(--border-color)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
-                <Edit3 size={14} />
+                <Edit2 size={14} />
                 Edit Post
               </button>
+              
               <button
                 onClick={() => {
-                  setShowMenu(false);
-                  if (!isOwner) {
-                    alert('You can only delete your own posts.');
-                    return;
-                  }
+                  if (!isOwner) return;
                   handleDelete();
+                  setShowMenu(false);
                 }}
-                disabled={deleteLoading}
+                disabled={!isOwner || deleteLoading}
                 style={{
+                  width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  width: '100%',
-                  padding: '10px 12px',
+                  padding: '8px 12px',
                   border: 'none',
                   background: 'none',
-                  color: isOwner ? '#ef4444' : 'var(--text-muted)',
                   fontSize: '13px',
+                  color: isOwner ? '#ef4444' : 'var(--text-muted)',
                   cursor: isOwner ? 'pointer' : 'not-allowed',
+                  borderRadius: '4px',
                   textAlign: 'left',
                   opacity: isOwner ? 1 : 0.5
+                }}
+                onMouseEnter={(e) => {
+                  if (isOwner) e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 <Trash2 size={14} />
                 Delete Post
               </button>
+
+              {!isOwner && (
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)', padding: '4px 8px', textAlign: 'center', borderTop: '1px solid var(--border-color)', marginTop: '4px' }}>
+                  Author actions only
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Editable Content vs Normal Content */}
+      {/* Post Content */}
       {isEditing ? (
-        <div style={{ marginBottom: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
@@ -284,45 +304,46 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
               width: '100%',
               minHeight: '85px',
               padding: '10px',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-app)',
+              borderRadius: '8px',
+              border: '1px solid var(--primary-color)',
+              backgroundColor: 'var(--bg-card)',
               color: 'var(--text-main)',
               fontFamily: 'inherit',
               fontSize: '15px',
               resize: 'vertical',
-              marginBottom: '8px',
               outline: 'none'
             }}
           />
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button 
+            <button
               onClick={() => {
                 setIsEditing(false);
                 setEditContent(post.content || '');
               }}
               style={{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: '1px solid var(--border-color)',
                 backgroundColor: 'transparent',
                 color: 'var(--text-muted)',
-                border: '1px solid var(--border-color)',
-                padding: '4px 12px',
-                borderRadius: '16px',
-                fontSize: '12px',
+                fontSize: '13px',
+                fontWeight: '600',
                 cursor: 'pointer'
               }}
             >
               Cancel
             </button>
-            <button 
-              onClick={handleSaveEdit}
+            <button
+              onClick={handleEdit}
               disabled={editLoading}
               style={{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: 'none',
                 backgroundColor: 'var(--primary-color)',
                 color: '#fff',
-                border: 'none',
-                padding: '4px 12px',
-                borderRadius: '16px',
-                fontSize: '12px',
+                fontSize: '13px',
+                fontWeight: '600',
                 cursor: 'pointer'
               }}
             >

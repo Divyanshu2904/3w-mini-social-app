@@ -61,6 +61,11 @@ export const Feed: React.FC = () => {
     );
   };
 
+  const handlePostDeleted = (deletedPostId: string) => {
+    // Filter out the deleted post instantly
+    setPosts((prevPosts) => prevPosts.filter((post) => post._id !== deletedPostId));
+  };
+
   const handleLoadMore = () => {
     if (page < totalPages) {
       fetchPosts(page + 1, true);
@@ -143,6 +148,7 @@ export const Feed: React.FC = () => {
                   key={post._id}
                   post={post}
                   onPostUpdated={handlePostUpdated}
+                  onPostDeleted={handlePostDeleted}
                 />
               ))
             )}

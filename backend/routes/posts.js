@@ -160,6 +160,32 @@ router.delete('/:id/comment/:commentId', protect, async (req, res) => {
   }
 });
 
+// @desc    Update a post
+// @route   PUT /api/posts/:id
+// @access  Private
+router.put('/:id', protect, async (req, res) => {
+  try {
+    const { content } = req.body;
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Check ownership
+    if (post.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'User not authorized to edit this post' });
+    }
+
+    post.content = content;
+    await post.save();
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @desc    Delete a post
 // @route   DELETE /api/posts/:id
 // @access  Private

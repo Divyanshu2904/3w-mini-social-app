@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Heart, MessageSquare, Trash2 } from 'lucide-react';
+import { Heart, MessageSquare, Trash2, MoreVertical, Edit3 } from 'lucide-react';
 import axios from 'axios';
 import { Avatar } from '@mui/material';
 import { CommentSection } from './CommentSection';
@@ -41,6 +41,10 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
   const [likeLoading, setLikeLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content || '');
+  const [editLoading, setEditLoading] = useState(false);
 
   // Check if current logged-in user liked this post
   const isLiked = user ? post.likes.some((like) => like.user === user._id) : false;
@@ -97,6 +101,24 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
     }
   };
 
+  const handleSaveEdit = async () => {
+    if (editContent.trim() === '' && !post.imageUrl) {
+      alert('A post must have either text content or an image.');
+      return;
+    }
+    setEditLoading(true);
+    try {
+      const res = await axios.put(`${apiBaseUrl}/posts/${post._id}`, { content: editContent });
+      onPostUpdated(res.data);
+      setIsEditing(false);
+    } catch (err: any) {
+      console.error('Failed to update post:', err);
+      alert(err.response?.data?.message || 'Failed to update post');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const handleCommentsUpdated = (newComments: Comment[]) => {
     onPostUpdated({ ...post, comments: newComments });
   };
@@ -139,29 +161,8 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
           </div>
         </div>
 
-        {isOwner ? (
-          <button 
-            onClick={handleDelete}
-            disabled={deleteLoading}
-            style={{
-              backgroundColor: 'transparent',
-              color: '#ef4444',
-              border: 'none',
-              padding: '6px',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            title="Delete Post"
-          >
-            <Trash2 size={18} />
-          </button>
-        ) : (
+        {/* Action Controls - Keep Follow for everyone, plus 3-dot dropdown menu */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
           <button 
             style={{
               backgroundColor: 'rgba(37, 99, 235, 0.1)',
@@ -176,39 +177,190 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated, onPostD
           >
             Follow
           </button>
-        )}
-      </div>
 
-      {/* Post Content */}
-      {post.content && (
-        <div style={{ marginBottom: post.imageUrl ? '12px' : '0' }}>
-          <p style={{
-            fontSize: '15px',
-            color: 'var(--text-main)',
-            lineHeight: '1.6',
-            whiteSpace: 'pre-wrap',
-            lineBreak: 'anywhere'
-          }}>
-            {displayedContent}
-          </p>
-          {shouldTruncate && (
-            <button
-              onClick={() => setShowFullContent(!showFullContent)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--primary-color)',
-                fontSize: '13px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                padding: '4px 0 0 0',
-                display: 'block'
-              }}
-            >
-              {showFullContent ? 'Show Less' : 'Show More'}
-            </button>
+          {/* 3-dot dropdown trigger */}
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '6px',
+              borderRadius: '50%',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-color)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            title="Post actions"
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {/* Dropdown Options */}
+          {showMenu && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: '36px',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              zIndex: 10,
+              minWidth: '130px',
+              overflow: 'hidden'
+            }}>
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  if (!isOwner) {
+                    alert('You can only edit your own posts.');
+                    return;
+                  }
+                  setIsEditing(true);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: 'none',
+                  background: 'none',
+                  color: isOwner ? 'var(--text-main)' : 'var(--text-muted)',
+                  fontSize: '13px',
+                  cursor: isOwner ? 'pointer' : 'not-allowed',
+                  textAlign: 'left',
+                  opacity: isOwner ? 1 : 0.5
+                }}
+              >
+                <Edit3 size={14} />
+                Edit Post
+              </button>
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  if (!isOwner) {
+                    alert('You can only delete your own posts.');
+                    return;
+                  }
+                  handleDelete();
+                }}
+                disabled={deleteLoading}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: 'none',
+                  background: 'none',
+                  color: isOwner ? '#ef4444' : 'var(--text-muted)',
+                  fontSize: '13px',
+                  cursor: isOwner ? 'pointer' : 'not-allowed',
+                  textAlign: 'left',
+                  opacity: isOwner ? 1 : 0.5
+                }}
+              >
+                <Trash2 size={14} />
+                Delete Post
+              </button>
+            </div>
           )}
         </div>
+      </div>
+
+      {/* Editable Content vs Normal Content */}
+      {isEditing ? (
+        <div style={{ marginBottom: '12px' }}>
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            style={{
+              width: '100%',
+              minHeight: '85px',
+              padding: '10px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              backgroundColor: 'var(--bg-app)',
+              color: 'var(--text-main)',
+              fontFamily: 'inherit',
+              fontSize: '15px',
+              resize: 'vertical',
+              marginBottom: '8px',
+              outline: 'none'
+            }}
+          />
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button 
+              onClick={() => {
+                setIsEditing(false);
+                setEditContent(post.content || '');
+              }}
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--text-muted)',
+                border: '1px solid var(--border-color)',
+                padding: '4px 12px',
+                borderRadius: '16px',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleSaveEdit}
+              disabled={editLoading}
+              style={{
+                backgroundColor: 'var(--primary-color)',
+                color: '#fff',
+                border: 'none',
+                padding: '4px 12px',
+                borderRadius: '16px',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              {editLoading ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        post.content && (
+          <div style={{ marginBottom: post.imageUrl ? '12px' : '0' }}>
+            <p style={{
+              fontSize: '15px',
+              color: 'var(--text-main)',
+              lineHeight: '1.6',
+              whiteSpace: 'pre-wrap',
+              lineBreak: 'anywhere'
+            }}>
+              {displayedContent}
+            </p>
+            {shouldTruncate && (
+              <button
+                onClick={() => setShowFullContent(!showFullContent)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary-color)',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  padding: '4px 0 0 0',
+                  display: 'block'
+                }}
+              >
+                {showFullContent ? 'Show Less' : 'Show More'}
+              </button>
+            )}
+          </div>
+        )
       )}
 
       {/* Post Image */}

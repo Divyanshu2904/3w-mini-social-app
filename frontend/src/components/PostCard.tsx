@@ -96,7 +96,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdated }) => {
           <Avatar 
             sx={{ bgcolor: 'var(--primary-color)', width: 40, height: 40, fontSize: '15px', fontWeight: 'bold' }}
           >
-            {post.username.substring(0, 2).toUpperCase()}
+            {post.username.substring(0, 1).toUpperCase()}
           </Avatar>
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>

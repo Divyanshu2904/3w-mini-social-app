@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, LogIn, Award, Wallet, Bell } from 'lucide-react';
+import { LogOut, LogIn } from 'lucide-react';
 import { Avatar } from '@mui/material';
 
 export const Navbar: React.FC = () => {
@@ -32,46 +32,6 @@ export const Navbar: React.FC = () => {
         <span style={{ color: 'var(--primary-color)' }}>Mini</span>Social
       </div>
 
-      {/* TaskPlanet Inspired Mock Earning Stats */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          backgroundColor: 'rgba(234, 179, 8, 0.1)',
-          padding: '6px 10px',
-          borderRadius: '20px',
-          border: '1px solid rgba(234, 179, 8, 0.2)',
-          fontSize: '13px',
-          fontWeight: '700',
-          color: '#eab308'
-        }}>
-          <Award size={16} />
-          225
-        </div>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          backgroundColor: 'rgba(34, 197, 94, 0.1)',
-          padding: '6px 10px',
-          borderRadius: '20px',
-          border: '1px solid rgba(34, 197, 94, 0.2)',
-          fontSize: '13px',
-          fontWeight: '700',
-          color: '#22c55e'
-        }}>
-          <Wallet size={16} />
-          ₹0.00
-        </div>
-
-        <div style={{ position: 'relative', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-          <Bell size={20} />
-          <span style={{ position: 'absolute', top: -3, right: -3, width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--danger-color)' }} />
-        </div>
-      </div>
-
       {/* Right controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {user ? (
@@ -79,7 +39,7 @@ export const Navbar: React.FC = () => {
             <Avatar 
               sx={{ bgcolor: 'var(--primary-color)', width: 34, height: 34, fontSize: '14px', fontWeight: 'bold' }}
             >
-              {user.username.substring(0, 2).toUpperCase()}
+              {user.username.substring(0, 1).toUpperCase()}
             </Avatar>
             
             <div style={{ display: 'none', flexDirection: 'column' /* Hidden on small screens */ }}>

@@ -59,7 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    setLoading(true);
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
       const { token: userToken, ...userData } = res.data;
@@ -67,13 +66,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(userToken);
       setUser(userData);
     } catch (err: any) {
-      setLoading(false);
       throw new Error(err.response?.data?.message || 'Login failed');
     }
   };
 
   const signup = async (username: string, email: string, password: string) => {
-    setLoading(true);
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/signup`, { username, email, password });
       const { token: userToken, ...userData } = res.data;
@@ -81,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(userToken);
       setUser(userData);
     } catch (err: any) {
-      setLoading(false);
       throw new Error(err.response?.data?.message || 'Signup failed');
     }
   };

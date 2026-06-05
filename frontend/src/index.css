@@ -19,27 +19,18 @@
   --yellow-hover: #ca8a04;
   --danger-color: #ef4444;
   
-  /* Initial settings: Dark Mode active by default */
-  --bg-body: var(--bg-dark);
-  --bg-card: var(--bg-card-dark);
-  --text-main: var(--text-dark);
-  --text-muted: var(--text-muted-dark);
-  --border-color: var(--border-dark);
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --radius-lg: 16px;
-  --radius-md: 10px;
-  --radius-sm: 6px;
-  
-  --font-family: 'Outfit', sans-serif;
-}
-
-[data-theme="light"] {
+  /* Initial settings: Light Mode active by default */
   --bg-body: var(--bg-light);
   --bg-card: var(--bg-card-light);
   --text-main: var(--text-light);
   --text-muted: var(--text-muted-light);
   --border-color: var(--border-light);
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  
+  --font-family: 'Outfit', sans-serif;
 }
 
 * {

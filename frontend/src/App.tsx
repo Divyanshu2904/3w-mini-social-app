@@ -14,7 +14,7 @@ const AppContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-dark)' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-body)' }}>
         <CircularProgress color="primary" />
       </div>
     );

@@ -1,22 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Moon, Sun, LogOut, LogIn, Award, Wallet, Bell } from 'lucide-react';
+import { LogOut, LogIn, Award, Wallet, Bell } from 'lucide-react';
 import { Avatar } from '@mui/material';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [theme, setTheme] = useState(localStorage.getItem('mini_social_theme') || 'dark');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('mini_social_theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
 
   return (
     <nav style={{
@@ -84,14 +74,6 @@ export const Navbar: React.FC = () => {
 
       {/* Right controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {/* Theme Switcher */}
-        <button 
-          onClick={toggleTheme} 
-          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Avatar 

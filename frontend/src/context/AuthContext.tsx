@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       try {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const res = await axios.get(`${API_BASE_URL}/auth/me`);
+        const res = await `${API_BASE_URL}/auth/me`);
         setUser(res.data);
       } catch (err) {
         console.error('Failed to authenticate token:', err);

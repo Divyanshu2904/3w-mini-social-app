@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Globe } from 'lucide-react';
 
 export const Welcome: React.FC = () => {
   const navigate = useNavigate();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const slides = [
     {
@@ -24,9 +26,51 @@ export const Welcome: React.FC = () => {
     },
   ];
 
+  // Auto-swipe slides every 2.5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 2500);
+
+    return () => clearInterval(timer);
+  }, [activeSlide]);
+
+  // Handle mobile touch swipe gestures
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      // Swipe Left -> Next Slide
+      setActiveSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    } else if (isRightSwipe) {
+      // Swipe Right -> Previous Slide
+      setActiveSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    }
+  };
+
   return (
     <div className="welcome-page">
-      <div className="welcome-slider">
+      <div 
+        className="welcome-slider"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{ touchAction: 'pan-y', cursor: 'grab' }}
+      >
         <img
           src={slides[activeSlide].image}
           alt="Illustration"

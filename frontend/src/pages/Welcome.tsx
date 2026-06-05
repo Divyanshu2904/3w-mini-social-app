@@ -83,15 +83,39 @@ export const Welcome: React.FC = () => {
         <h2 className="welcome-title">{slides[activeSlide].title}</h2>
         <p className="welcome-subtitle">{slides[activeSlide].subtitle}</p>
 
-        <div className="welcome-dots">
+        <div className="welcome-dots" style={{ position: 'relative', height: '8px', width: '48px', margin: '0 auto 24px auto' }}>
+          {/* Static background placeholder dots */}
           {slides.map((_, index) => (
             <div
               key={index}
-              className={`dot ${activeSlide === index ? 'active' : ''}`}
+              className="dot"
               onClick={() => setActiveSlide(index)}
-              style={{ cursor: 'pointer' }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: `${index * 16 + 4}px`,
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                backgroundColor: activeSlide === index ? 'transparent' : '#cbd5e1',
+              }}
             />
           ))}
+          {/* Sliding active pill indicator with premium spring-bounce easing motion */}
+          <div
+            className="active-indicator"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '16px',
+              height: '8px',
+              borderRadius: '4px',
+              backgroundColor: 'var(--primary-color)',
+              transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transform: `translateX(${activeSlide * 16}px)`,
+              pointerEvents: 'none',
+            }}
+          />
         </div>
       </div>
 

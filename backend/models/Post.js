@@ -61,11 +61,9 @@ const postSchema = new mongoose.Schema(
 );
 
 // Custom validation to ensure either content or imageUrl is present
-postSchema.pre('validate', function (next) {
+postSchema.pre('validate', function () {
   if (!this.content && !this.imageUrl) {
-    next(new Error('A post must have either text content or an image'));
-  } else {
-    next();
+    throw new Error('A post must have either text content or an image');
   }
 });
 
